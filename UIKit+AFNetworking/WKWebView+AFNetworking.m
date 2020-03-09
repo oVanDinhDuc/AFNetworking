@@ -136,7 +136,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu"
         __strong __typeof(weakSelf) strongSelf = weakSelf;
-        [strongSelf loadData:data MIMEType:(MIMEType ?: [operation.response MIMEType]) textEncodingName:(textEncodingName ?: [operation.response textEncodingName]) baseURL:[operation.response URL]];
+        [strongSelf loadData:data MIMEType:(MIMEType ?: [operation.response MIMEType]) characterEncodingName:(textEncodingName ?: [operation.response textEncodingName]) baseURL:[operation.response URL]];
 
         
                                  if([strongNavSelf respondsToSelector:@selector(webView:didFinishNavigation:)]){                                  [strongNavSelf webView:strongSelf didFinishNavigation:strongNavSelf];
@@ -155,7 +155,6 @@
         [strongNavSelf webView:self didStartProvisionalNavigation:strongNavSelf];
     }
     
-}
 }
 
 @end
