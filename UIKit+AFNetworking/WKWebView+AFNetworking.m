@@ -1,4 +1,4 @@
-// UIWebView+AFNetworking.m
+// WKWebView+AFNetworking.m
 //
 // Copyright (c) 2013-2015 AFNetworking (http://afnetworking.com)
 //
@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "UIWebView+AFNetworking.h"
+#import "WKWebView+AFNetworking.h"
 
 #import <objc/runtime.h>
 
@@ -30,11 +30,11 @@
 #import "AFURLResponseSerialization.h"
 #import "AFURLRequestSerialization.h"
 
-@interface UIWebView (_AFNetworking)
+@interface WKWebView (_AFNetworking)
 @property (readwrite, nonatomic, strong, setter = af_setHTTPRequestOperation:) AFHTTPRequestOperation *af_HTTPRequestOperation;
 @end
 
-@implementation UIWebView (_AFNetworking)
+@implementation WKWebView (_AFNetworking)
 
 - (AFHTTPRequestOperation *)af_HTTPRequestOperation {
     return (AFHTTPRequestOperation *)objc_getAssociatedObject(self, @selector(af_HTTPRequestOperation));
@@ -48,7 +48,7 @@
 
 #pragma mark -
 
-@implementation UIWebView (AFNetworking)
+@implementation WKWebView (AFNetworking)
 
 - (AFHTTPRequestSerializer <AFURLRequestSerialization> *)requestSerializer {
     static AFHTTPRequestSerializer <AFURLRequestSerialization> *_af_defaultRequestSerializer = nil;
@@ -118,6 +118,7 @@
 {
     NSParameterAssert(request);
 
+     __strong __typeof(self.navigationDelegate) strongNavSelf = self.navigationDelegate;
     if (self.af_HTTPRequestOperation) {
         [self.af_HTTPRequestOperation cancel];
     }
@@ -135,11 +136,12 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu"
         __strong __typeof(weakSelf) strongSelf = weakSelf;
-        [strongSelf loadData:data MIMEType:(MIMEType ?: [operation.response MIMEType]) textEncodingName:(textEncodingName ?: [operation.response textEncodingName]) baseURL:[operation.response URL]];
+        [strongSelf loadData:responseObject MIMEType:MIMEType characterEncodingName:textEncodingName baseURL:[dataTask.currentRequest URL]];
 
-        if ([strongSelf.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
-            [strongSelf.delegate webViewDidFinishLoad:strongSelf];
-        }
+        
+                                 if ([strongSelf.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {                                 if([strongNavSelf respondsToSelector:@selector(webView:didFinishNavigation:)]){
+                                    [strongSelf.delegate webViewDidFinishLoad:strongSelf];                                     [strongNavSelf webView:strongSelf didFinishNavigation:strongNavSelf];
+                                }                                 }
         
 #pragma clang diagnostic pop
     } failure:^(AFHTTPRequestOperation * __unused operation, NSError *error) {
@@ -150,9 +152,10 @@
 
     [self.af_HTTPRequestOperation start];
 
-    if ([self.delegate respondsToSelector:@selector(webViewDidStartLoad:)]) {
+    if([strongNavSelf respondsToSelector:@selector(webView:didStartProvisionalNavigation:)]){
         [self.delegate webViewDidStartLoad:self];
-    }
+        [strongNavSelf webView:self didStartProvisionalNavigation:strongNavSelf];
+    }             }
 }
 
 @end
